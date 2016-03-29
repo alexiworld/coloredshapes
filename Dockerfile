@@ -2,7 +2,7 @@
 #
 # VERSION               1.0.0
 #
-# docker build -t --no-cache alexiworld/schedule .
+# docker build --no-cache -t alexiworld/schedule .
 # docker run -it -p 8080:8080 -p 3306:3306 alexiworld/schedule /bin/bash -c /schedule.sh
 
 FROM      alexiworld/mysql
