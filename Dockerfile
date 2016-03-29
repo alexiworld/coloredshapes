@@ -61,7 +61,7 @@ RUN echo "export JAVA_OPTS=\"-Dcoloredshapes.env=local -Dcoloredshapes.cfg=/colo
 
 WORKDIR /
 RUN echo "./run.sh &"              > schedule.sh
-RUN echo "sleep 5"                >> schedule.sh
+RUN echo "sleep 30"                >> schedule.sh
 RUN echo "mysql < /coloredshapes/product/init_dbs.sql"   >> schedule.sh
 RUN echo "mysql < /coloredshapes/product/core-services.sql"  >> schedule.sh
 RUN echo "mysql < /coloredshapes/product/group-schedule.sql" >> schedule.sh
