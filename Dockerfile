@@ -62,9 +62,9 @@ RUN echo "export JAVA_OPTS=\"-Dcoloredshapes.env=local -Dcoloredshapes.cfg=/colo
 WORKDIR /
 RUN echo "./run.sh &"              > schedule.sh
 RUN echo "sleep 5"                >> schedule.sh
-RUN echo "mysql < init_dbs.sql"   >> schedule.sh
-RUN echo "mysql < core-services.sql"  >> schedule.sh
-RUN echo "mysql < group-schedule.sql" >> schedule.sh
+RUN echo "mysql < /coloredshapes/product/init_dbs.sql"   >> schedule.sh
+RUN echo "mysql < /coloredshapes/product/core-services.sql"  >> schedule.sh
+RUN echo "mysql < /coloredshapes/product/group-schedule.sql" >> schedule.sh
 RUN echo "$TOMCAT/bin/startup.sh" >> schedule.sh
 RUN chmod a+x schedule.sh
 
