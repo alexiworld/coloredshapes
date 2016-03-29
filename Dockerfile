@@ -1,59 +1,71 @@
-apt-get update
-apt-get install -y software-properties-common
-cd core-services
-gradle eclipse
-gradle war
-gradle jettyRun --offline -Dcoloredshapes.env=local -Dcoloredshapes.cfg=/coloredshapes/product/external-config
-echo "version=1.0.0" > gradle.properties
-apt-get install -y python-software-properties
-add-apt-repository ppa:openjdk-r/ppa -y
-apt-get update
-apt-get install -y openjdk-8-jdk
-update-alternatives --config java
-update-alternatives --config javac
-apt-get install -y vim
-apt-get install -y wget
-apt-get install -y curl
-apt-get install -y unzip
-apt-get install -y git
+# Group and My Own Schedules
+#
+# VERSION               1.0.0
 
-mkdir /coloredshapes
-cd /coloredshapes
+FROM      alexiworld/mysql
+MAINTAINER Alexi Jordanov <alexiworld@yahoo.com>
 
-wget https://services.gradle.org/distributions/gradle-2.12-bin.zip
-unzip gradle-2.12-bin.zip
-export PATH=$PATH:/coloredshapes/gradle-2.12/bin/
+RUN apt-get update 
+RUN apt-get install -y \
+        software-properties-common \
+        python-software-properties
+RUN add-apt-repository ppa:openjdk-r/ppa -y
+RUN apt-get update && \
+    apt-get install -y openjdk-8-jdk   && \
+    update-alternatives --config java  && \
+    update-alternatives --config javac
+RUN apt-get install -y \
+        vim   \
+        wget  \
+        curl  \
+        unzip \
+        git
 
-wget http://apache.mirror.vexxhost.com/tomcat/tomcat-8/v8.0.33/bin/apache-tomcat-8.0.33.zip
-unzip apache-tomcat-8.0.33.zip
-export TOMCAT=/coloredshapes/apache-tomcat-8.0.33
-chmod a+x $TOMCAT/bin/*
+RUN mkdir /coloredshapes 
+WORKDIR   /coloredshapes
 
-git clone https://github.com/alexiworld/coloredshapes.git
-mv coloredshapes product
-cd product
-unzip -P password product.zip
+RUN wget https://services.gradle.org/distributions/gradle-2.12-bin.zip
+RUN unzip gradle-2.12-bin.zip
+ENV PATH $PATH:/coloredshapes/gradle-2.12/bin/
 
-cd core-services
-gradle eclipse
-echo "version=1.0.0" > gradle.properties
-gradle war
-cp build/libs/core-services-1.0.0-null.war $TOMCAT/webapps/core-services.war
-#gradle jettyRun --offline -Dcoloredshapes.env=local -Dcoloredshapes.cfg=/coloredshapes/product/external-config
+RUN wget http://apache.mirror.vexxhost.com/tomcat/tomcat-8/v8.0.33/bin/apache-tomcat-8.0.33.zip
+RUN unzip apache-tomcat-8.0.33.zip
+ENV TOMCAT /coloredshapes/apache-tomcat-8.0.33
+RUN chmod a+x $TOMCAT/bin/*
 
-cd ../group-schedule
-gradle eclipse
-echo "version=1.0.0" > gradle.properties
-gradle war
-cp build/libs/group-schedule-1.0.0-null.war $TOMCAT/webapps/group-schedule.war
-#gradle jettyRun --offline -Dcoloredshapes.env=local -Dcoloredshapes.cfg=/coloredshapes/product/external-config
+RUN git clone https://github.com/alexiworld/coloredshapes.git
+RUN mv coloredshapes product 
+WORKDIR ./product
+RUN unzip -P password product.zip
 
-cd ../my-own-schedule
-gradle eclipse
-echo "version=1.0.0" > gradle.properties
-gradle war
-cp build/libs/my-own-schedule-1.0.0.war $TOMCAT/webapps/my-own-schedule.war
-#gradle jettyRun --offline -Dcoloredshapes.env=local -Dcoloredshapes.cfg=/coloredshapes/product/external-config
+WORKDIR ./core-services
+RUN gradle eclipse
+RUN echo "version=1.0.0" > gradle.properties
+RUN gradle war
+RUN cp build/libs/core-services-1.0.0.war $TOMCAT/webapps/core-services.war
 
-cd $TOMCAT/bin
-./startup.sh
+WORKDIR ../group-schedule
+RUN gradle eclipse
+RUN echo "version=1.0.0" > gradle.properties
+RUN gradle war
+RUN cp build/libs/group-schedule-1.0.0.war $TOMCAT/webapps/group-schedule.war
+
+WORKDIR ../my-own-schedule
+RUN gradle eclipse
+RUN echo "version=1.0.0" > gradle.properties
+RUN gradle war
+RUN cp build/libs/my-own-schedule-1.0.0.war $TOMCAT/webapps/my-own-schedule.war
+
+WORKDIR $TOMCAT/bin
+RUN echo "export JAVA_OPTS=\"-Dcoloredshapes.env=local -Dcoloredshapes.cfg=/coloredshapes/product/external-config\"" > setenv.sh
+
+WORKDIR /
+RUN echo "./run.sh &"              > schedule.sh
+RUN echo "sleep 5"                >> schedule.sh
+RUN echo "mysql < init_dbs.sql"   >> schedule.sh
+RUN echo "mysql < core-services.sql"  >> schedule.sh
+RUN echo "mysql < group-schedule.sql" >> schedule.sh
+RUN echo "$TOMCAT/bin/startup.sh" >> schedule.sh
+RUN chmod a+x schedule.sh
+
+#ENTRYPOINT ["/schedule.sh"]

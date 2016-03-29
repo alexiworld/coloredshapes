@@ -1,8 +1,3 @@
-DROP USER 'tbu'@'localhost';
-
-DROP DATABASE IF EXISTS `core-services`;
-DROP DATABASE IF EXISTS `group-schedule`;
-
 CREATE DATABASE `core-services` CHARACTER SET utf8 COLLATE utf8_general_ci;
 CREATE DATABASE `group-schedule` CHARACTER SET utf8 COLLATE utf8_general_ci;
 
