@@ -1,6 +1,9 @@
 # Group and My Own Schedules
 #
 # VERSION               1.0.0
+#
+# docker build -t alexiworld/schedule .
+# docker run -it -p 3306 -p 8080 alexiworld/schedule /bin/bash -c /schedule.sh
 
 FROM      alexiworld/mysql
 MAINTAINER Alexi Jordanov <alexiworld@yahoo.com>
@@ -62,10 +65,11 @@ RUN echo "export JAVA_OPTS=\"-Dcoloredshapes.env=local -Dcoloredshapes.cfg=/colo
 WORKDIR /
 RUN echo "./run.sh &"              > schedule.sh
 RUN echo "sleep 30"                >> schedule.sh
-RUN echo "mysql < /coloredshapes/product/init_dbs.sql"   >> schedule.sh
+RUN echo "mysql < /coloredshapes/product/init_dbs.sql"       >> schedule.sh
 RUN echo "mysql < /coloredshapes/product/core-services.sql"  >> schedule.sh
 RUN echo "mysql < /coloredshapes/product/group-schedule.sql" >> schedule.sh
 RUN echo "$TOMCAT/bin/startup.sh" >> schedule.sh
+RUN echo "sleep infinity"         >> schedule.sh
 RUN chmod a+x schedule.sh
 
 #ENTRYPOINT ["/schedule.sh"]
